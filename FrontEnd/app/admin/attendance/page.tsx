@@ -28,6 +28,29 @@ type AttendanceRecord = {
   attendanceId?: number
 }
 
+const normalizeClassValue = (value: string) =>
+  value.trim().replace(/^grade\s*/i, "").replace(/\s+/g, "").toUpperCase()
+
+const formatClassLabel = (value: string) => {
+  const normalized = normalizeClassValue(value)
+  return normalized ? `Grade ${normalized}` : ""
+}
+
+const classes = Array.from({ length: 12 }, (_, index) => {
+  const grade = index + 1
+  return [`${grade}A`, `${grade}B`]
+}).flat()
+
+const normalizeAttendanceDate = (value: string) => {
+  // Supports ISO strings and legacy server date formats.
+  if (!value) return ""
+  if (value.includes("T")) return value.split("T")[0]
+
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return value
+  return parsed.toISOString().slice(0, 10)
+}
+
 export default function AttendancePage() {
   const [date, setDate] = useState<Date | null>(null)
   const [selectedClass, setSelectedClass] = useState<string>("")
@@ -77,7 +100,7 @@ export default function AttendancePage() {
       // Create a map of existing attendance for this date
       const attendanceMap = new Map<number, ApiAttendanceRecord>()
       allAttendance.forEach((att: ApiAttendanceRecord) => {
-        const attDate = att.date.split("T")[0] // Handle both "2024-01-01" and "2024-01-01T00:00:00"
+        const attDate = normalizeAttendanceDate(att.date)
         if (attDate === dateStr) {
           attendanceMap.set(att.student_id, att)
         }
@@ -107,37 +130,10 @@ export default function AttendancePage() {
     }
   }
 
-  const classes = [
-    "Grade 1A",
-    "Grade 1B",
-    "Grade 2A",
-    "Grade 2B",
-    "Grade 3A",
-    "Grade 3B",
-    "Grade 4A",
-    "Grade 4B",
-    "Grade 5A",
-    "Grade 5B",
-    "Grade 6A",
-    "Grade 6B",
-    "Grade 7A",
-    "Grade 7B",
-    "Grade 8A",
-    "Grade 8B",
-    "Grade 9A",
-    "Grade 9B",
-    "Grade 10A",
-    "Grade 10B",
-    "Grade 11A",
-    "Grade 11B",
-    "Grade 12A",
-    "Grade 12B",
-  ]
-
   const filteredAttendance = selectedClass && selectedClass !== "all"
     ? attendance.filter((record) => {
         const student = students.find((s) => s.id === record.studentId)
-        return student?.grade === selectedClass
+        return normalizeClassValue(student?.grade || "") === selectedClass
       })
     : attendance
 
@@ -157,7 +153,7 @@ export default function AttendancePage() {
       const recordsToSave = selectedClass && selectedClass !== "all"
         ? attendance.filter((record) => {
             const student = students.find((s) => s.id === record.studentId)
-            return student?.grade === selectedClass
+            return normalizeClassValue(student?.grade || "") === selectedClass
           })
         : attendance
 
@@ -300,7 +296,7 @@ export default function AttendancePage() {
                   </SelectItem>
                   {classes.map((cls) => (
                     <SelectItem key={cls} value={cls} className="font-medium">
-                      {cls}
+                      {formatClassLabel(cls)}
                     </SelectItem>
                   ))}
                 </SelectContent>

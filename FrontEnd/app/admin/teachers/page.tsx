@@ -104,7 +104,7 @@ export default function TeachersPage() {
 
   const handleDialogClose = () => {
     setIsOpen(false)
-    setFormData({ name: "", email: "", subject: "", role: "" })
+    setFormData({ name: "", email: "", subject: "" })
     setEditingTeacher(null)
   }
 

@@ -1,17 +1,10 @@
-# =============================
-# Root .gitignore for workspace
-# Backend (Python/FastAPI) + Frontend (Next.js with pnpm)
-# Windows/IDE artifacts, logs, env files
-# =============================
-
-# ---- Python backend (FastAPI) ----
-# Byte-compiled / optimized / DLL files
+# ------------------------------
+# Python
+# ------------------------------
 __pycache__/
 **/__pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.pyd
 *.so
 
@@ -21,59 +14,67 @@ venv/
 env/
 ENV/
 .python-version
+BackEnd/.venv/
 
-# Project-specific venv folder
-BackEnd/class/
-
-# Unit test / coverage reports
+# Testing and coverage
 .coverage
 .coverage.*
-.cache
+.cache/
 .pytest_cache/
-nosetests.xml
-coverage.xml
-htmlcov/
-
-# Type checker / analysis caches
 .mypy_cache/
-.pyre/
 .ruff_cache/
+.pyre/
+htmlcov/
+coverage.xml
+nosetests.xml
 
-# ---- Secrets / Environment ----
+# ------------------------------
+# Node / Next.js
+# ------------------------------
+node_modules/
+FrontEnd/node_modules/
+.next/
+FrontEnd/.next/
+out/
+FrontEnd/out/
+.turbo/
+FrontEnd/.turbo/
+.vercel/
+FrontEnd/.vercel/
+.parcel-cache/
+FrontEnd/.parcel-cache/
+coverage/
+FrontEnd/coverage/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ------------------------------
+# Environment files / secrets
+# ------------------------------
 .env
 .env.*
 *.env
 
-# ---- Logs ----
-logs/
-*.log
-*.-debug.log*
-
-# ---- OS / Editor junk ----
-.DS_Store
-Thumbs.db
-desktop.ini
-.vscode/
-.history/
-
-# ---- Generic build outputs ----
+# ------------------------------
+# Build output
+# ------------------------------
 dist/
 build/
 
-# ---- Node/Next.js frontend ----
-FrontEnd/node_modules/
-FrontEnd/.next/
-FrontEnd/.turbo/
-FrontEnd/out/
-FrontEnd/.vercel/
-FrontEnd/.eslintcache
-FrontEnd/pnpm-debug.log*
-FrontEnd/npm-debug.log*
-FrontEnd/yarn-debug.log*
-FrontEnd/yarn-error.log*
-FrontEnd/.parcel-cache/
-FrontEnd/coverage/
-
-# Keep lockfiles (tracked)
-# !FrontEnd/pnpm-lock.yaml
+# ------------------------------
+# IDE / OS junk
+# ------------------------------
+.vscode/
+.idea/
+.history/
+.DS_Store
+Thumbs.db
+desktop.ini
 

@@ -4,6 +4,7 @@ from ..models.student_model import StudentModel
 from ..extentions import db
 from ..schemas.student_schema import StudentSchema
 from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 student_router = Blueprint("student_router",__name__)
 
@@ -45,6 +46,14 @@ def add_student():
                     error_messages.append(f"{field}: {messages}")
             error_text = ", ".join(error_messages)
             return jsonify({"error": error_text or "Validation failed"}), 400
+        except IntegrityError as e:
+            db.session.rollback()
+            error_text = str(getattr(e, "orig", e)).lower()
+            if "email" in error_text:
+                return jsonify({"error": "Student with this email already exists"}), 409
+            if "phon" in error_text or "phone" in error_text:
+                return jsonify({"error": "Student with this phone already exists"}), 409
+            return jsonify({"error": "Duplicate data found"}), 409
         except Exception as e:  
             db.session.rollback()
             return jsonify({"message": "An error occurred", "error": str(e)}), 500

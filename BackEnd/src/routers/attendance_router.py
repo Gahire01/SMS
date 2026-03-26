@@ -15,16 +15,33 @@ def mark_attendance():
         schema = AttendanceSchema()
         data = schema.load(request.get_json() or request.form)
 
-        attendance = AttendanceModel(
-            student_id=data['student_id'],
-            date=data.get('date'),
-            status=data['status']
-        )
+        attendance_date = data.get('date')
 
-        db.session.add(attendance)
+        # Upsert by (student_id, date) so re-saving attendance on the same day
+        # updates the existing row instead of failing on unique constraint.
+        existing_attendance = AttendanceModel.query.filter_by(
+            student_id=data['student_id'],
+            date=attendance_date,
+        ).first()
+
+        if existing_attendance:
+            existing_attendance.status = data['status']
+            attendance = existing_attendance
+            message = "Attendance updated successfully"
+            status_code = 200
+        else:
+            attendance = AttendanceModel(
+                student_id=data['student_id'],
+                date=attendance_date,
+                status=data['status']
+            )
+            db.session.add(attendance)
+            message = "Attendance marked successfully"
+            status_code = 201
+
         db.session.commit()
         
-        return jsonify({"message": "Attendance marked successfully", "attendance_id": attendance.attendance_id}), 201
+        return jsonify({"message": message, "attendance_id": attendance.attendance_id}), status_code
     
     except ValidationError as err:
         return jsonify({"error": "Validation failed", "messages": err.messages}), 400
@@ -44,7 +61,7 @@ def get_attendance():
         attendance_info = {
             "id": att.attendance_id,
             "student_id": att.student_id,
-            "date": att.date,
+            "date": att.date.isoformat() if att.date else None,
             "status": att.status
         }
 

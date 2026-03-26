@@ -4,6 +4,7 @@ from ..models.teacher_model import TeacherModel
 from ..extentions import db
 from ..schemas.teacher_schema import TeacherSchema
 from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 teacher_router = Blueprint("teacher_router",__name__)
 
@@ -34,6 +35,9 @@ def add_teacher():
                 error_messages.append(f"{field}: {messages}")
         error_text = ", ".join(error_messages)
         return jsonify({"error": error_text or "Validation failed"}), 400
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "Teacher with this email already exists"}), 409
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Failed to add teacher", "message": str(e)}), 500
